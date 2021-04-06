@@ -122,6 +122,24 @@ async function sendTx(zkWallet, newAddr) { // L2 to L2
   console.log("transfer: ", transfer);
 }
 
-// getWallet()
-console.log()
-getBalanceAndSendTx()
+function main() {
+  const args = process.argv
+
+  let num = 10
+  if (args.length > 2) {
+
+    let arg = args[2]
+    num = parseInt(arg)
+
+  }
+
+  for (var i = 0; i < num; i++) {
+    getWallet()
+    console.log("----------")
+  }
+
+}
+
+main()
+
+// getBalanceAndSendTx()
