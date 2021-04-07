@@ -13,7 +13,6 @@ function getWallet() {
   console.log("addr: ", addr)
 }
 
-
 async function getBalanceAndSendTx() {
 
   const _privKey = ""
@@ -33,10 +32,10 @@ async function getBalanceAndSendTx() {
   /// Checking zkSync account balance
 
   // Committed state is not final yet
-  let committedETHBalance = await zkWallet.AndSendTx("ETH")
+  let committedETHBalance = await zkWallet.getBalance("ETH")
 
   // Verified state is final
-  const verifiedETHBalance = await zkWallet.AndSendTx("ETH", "verified")
+  const verifiedETHBalance = await zkWallet.getBalance("ETH", "verified")
 
   console.log("committedETHBalance: ", committedETHBalance)
   console.log("verifiedETHBalance: ", verifiedETHBalance)
