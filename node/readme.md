@@ -39,3 +39,5 @@ https://ropsten.zksync.io/deposit/
 https://ropsten.zkscan.io/
 
 https://uptime.com/s/zksync
+
+https://zksync.io/api/
