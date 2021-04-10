@@ -1,5 +1,19 @@
 const ethers = require("ethers")
 const zksync = require("zksync")
+const createCsvWriter = require("csv-writer").createObjectCsvWriter
+
+function getTimestamp() {
+  const now = +(new Date())
+  return parseInt(now / 1000)
+}
+
+const csvWriter = createCsvWriter({
+  path: `./ethaddrs_${getTimestamp().toString()}.csv`,
+  header: [
+      {id: 'privKey', title: 'PrivateKey'},
+      {id: 'address', title: 'EthAddress'}
+  ]
+});
 
 const _privKey = ""
 
@@ -100,7 +114,7 @@ async function sendTx(zkWallet, newAddr, cost) { // L2 to L2
       ethers.utils.parseEther(cost))
 
     const fee = zksync.utils.closestPackableTransactionFee(
-      ethers.utils.parseEther("0.001"))
+      ethers.utils.parseEther("0.0001")) // 调整手续费
 
     const transfer = await zkWallet.syncTransfer({
       to: newAddr,
@@ -109,12 +123,11 @@ async function sendTx(zkWallet, newAddr, cost) { // L2 to L2
       fee,
     })
 
-    console.log("transfer: ", transfer)
-
     return transfer
   }
 
-///
+////////////
+
 async function main() {
   const args = process.argv
 
@@ -123,24 +136,42 @@ async function main() {
 
     let arg = args[2]
     num = parseInt(arg)
-
   }
 
   const zkWalletObj = await getZkWallet(_privKey)
 
+  let records = []
+
   for (let i = 0; i < num; i++) {
     const wallet = getWallet()
+
+    records.push({privKey: wallet.privateKey , address: wallet.address})
     console.log("----------")
+  }
 
-    const addr = wallet.address
-    console.log(addr)
+  csvWriter.writeRecords(records)
+  .then(() => {
+    console.log('地址已保存');
+  });
 
-    const transfer = await sendTx(zkWalletObj, addr, '0.0012')
+  let txNonce
+
+  for (const item of records) {
+    const transfer = await sendTx(zkWalletObj, item.address, '0.0001')
     const tx = transfer.txData.tx
-    console.log(tx)
 
-    await new Promise(resolve => setTimeout(resolve, 10*1000)) // 10 seconds
+    if (txNonce !== tx.nonce) {
+      console.log("new nonce: ", tx.nonce)
+      console.log("new txhash: ", transfer.txHash)
+    } else {
+      console.error("Error tx nonce is same: ", tx.nonce)
+      console.error("Error tx nonce is same: ", transfer.txHash)
+      break
+    }
 
+    console.log()
+
+    await new Promise(resolve => setTimeout(resolve, 15 * 1000)) // 每隔15秒钟进行下1个交易，eth的出快时间
   }
 
 }
