@@ -126,19 +126,22 @@ async function main() {
 
   }
 
-  let wallets = []
-  for (let i = 0; i < num; i++) {
-    wallets.push(getWallet())
-    console.log("----------")
-  }
-
   const zkWalletObj = await getZkWallet(_privKey)
 
-  for (const wallet of wallets) {
-    const addr = wallet.address
-    console.log(addr);
-  }
+  for (let i = 0; i < num; i++) {
+    const wallet = getWallet()
+    console.log("----------")
 
+    const addr = wallet.address
+    console.log(addr)
+
+    const transfer = await sendTx(zkWalletObj, addr, '0.0012')
+    const tx = transfer.txData.tx
+    console.log(tx)
+
+    await new Promise(resolve => setTimeout(resolve, 10*1000)) // 10 seconds
+
+  }
 
 }
 
