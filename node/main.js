@@ -87,11 +87,16 @@ async function depositETHToZksync(zkWallet, newAddr){ // from eth to zksync , L1
 async function sendTx(zkWallet, newAddr, cost) { // L2 to L2
     const isSigningKeySet = await zkWallet.isSigningKeySet()
 
+    console.log("isSigningKeySet: ", isSigningKeySet)
+
     // L2 转账前，必须先解锁
     if (!isSigningKeySet) {
+
       if ((await zkWallet.getAccountId()) == undefined) {
         throw new Error("Unknown Account Id")
       }
+
+      console.log("签名ing")
 
       // As any other kind of transaction, `ChangePubKey` transaction requires fee.
       // User doesn't have (but can) to specify the fee amount. If omitted, library will query zkSync node for
@@ -99,7 +104,7 @@ async function sendTx(zkWallet, newAddr, cost) { // L2 to L2
       const changePubkey = await zkWallet.setSigningKey({
         ethAuthType: "ECDSA", // 显式指定验证类型
         feeToken: "ETH",
-        // fee: ethers.utils.parseEther("0.001")
+        // fee: ethers.utils.parseEther("0.0002") 可以不设置fee
       });
 
       // Wait until the tx is committed
@@ -114,13 +119,15 @@ async function sendTx(zkWallet, newAddr, cost) { // L2 to L2
       ethers.utils.parseEther(cost))
 
     const fee = zksync.utils.closestPackableTransactionFee(
-      ethers.utils.parseEther("0.0001")) // 调整手续费
+      ethers.utils.parseEther("0.0013")) // 调整手续费 0.000223
+
+    console.log("转账ing")
 
     const transfer = await zkWallet.syncTransfer({
       to: newAddr,
       token: "ETH",
       amount,
-      fee,
+      // fee, 可以不设置fee
     })
 
     return transfer
@@ -155,9 +162,10 @@ async function main() {
   });
 
   let txNonce
+  const cost = "0.01" // 转账金额
 
   for (const item of records) {
-    const transfer = await sendTx(zkWalletObj, item.address, '0.0001')
+    const transfer = await sendTx(zkWalletObj, item.address, cost)
     const tx = transfer.txData.tx
 
     if (txNonce !== tx.nonce) {
