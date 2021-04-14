@@ -2,6 +2,10 @@ const ethers = require("ethers")
 const zksync = require("zksync")
 const createCsvWriter = require("csv-writer").createObjectCsvWriter
 
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 function getTimestamp() {
   const now = +(new Date())
   return parseInt(now / 1000)
@@ -10,8 +14,8 @@ function getTimestamp() {
 const csvWriter = createCsvWriter({
   path: `./ethaddrs_${getTimestamp().toString()}.csv`,
   header: [
-      {id: 'privKey', title: 'PrivateKey'},
-      {id: 'address', title: 'EthAddress'}
+    {id: 'privKey', title: 'PrivateKey'},
+    {id: 'address', title: 'EthAddress'}
   ]
 });
 
@@ -165,6 +169,10 @@ async function main() {
   const cost = "0.01" // 转账金额
 
   for (const item of records) {
+
+    // const cost = getRandomArbitrary(0.01, 0.02).toString().substring(0, 6)
+    // console.log("cost: ", cost)
+
     const transfer = await sendTx(zkWalletObj, item.address, cost)
     const tx = transfer.txData.tx
 
